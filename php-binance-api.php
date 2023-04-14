@@ -86,9 +86,9 @@ class API
                 $this->setupCurlOptsFromFile();
                 break;
             case 1:
-                $this->setupApiConfigFromFile($param[0]);
-                $this->setupProxyConfigFromFile($param[0]);
-                $this->setupCurlOptsFromFile($param[0]);
+                $this->setupApiConfigFromSettingsArr($param[0]);
+                $this->setupProxyConfigFromSettingsArr($param[0]);
+                $this->setupCurlOptsFromSettingsArr($param[0]);
                 break;
             case 2:
                 $this->api_key = $param[0];
@@ -199,6 +199,65 @@ class API
             return;
         }
         $contents = json_decode(file_get_contents($file), true);
+        if (isset($contents['proto']) === false) {
+            return;
+        }
+        if (isset($contents['address']) === false) {
+            return;
+        }
+        if (isset($contents['port']) === false) {
+            return;
+        }
+        $this->proxyConf['proto'] = $contents['proto'];
+        $this->proxyConf['address'] = $contents['address'];
+        $this->proxyConf['port'] = $contents['port'];
+        if (isset($contents['user'])) {
+            $this->proxyConf['user'] = isset($contents['user']) ? $contents['user'] : "";
+        }
+        if (isset($contents['pass'])) {
+            $this->proxyConf['pass'] = isset($contents['pass']) ? $contents['pass'] : "";
+        }
+    }
+    
+    protected function setupProxyConfigSettingsArr(array $contents)
+    {
+        if (empty($this->api_key) === false || empty($this->api_secret) === false) {
+            return;
+        }
+        $this->api_key = isset($contents['api-key']) ? $contents['api-key'] : "";
+        $this->api_secret = isset($contents['api-secret']) ? $contents['api-secret'] : "";
+        $this->useTestnet = isset($contents['use-testnet']) ? (bool)$contents['use-testnet'] : false;
+    }
+
+    /**
+     * If no paramaters are supplied in the constructor, this function will attempt
+     * to load the acurlopts from the users home directory in the file
+     * ~/jaggedsoft/php-binance-api.json
+     *
+     * @param $file string file location
+     * @return null
+     */
+    protected function setupProxyConfigSettingsArr(array $contents)
+    {
+        if (count($this->curlOpts) > 0) {
+            return;
+        }
+        $contents = json_decode(file_get_contents($file), true);
+        $this->curlOpts = isset($contents['curlOpts']) && is_array($contents['curlOpts']) ? $contents['curlOpts'] : [];
+    }
+
+    /**
+     * If no paramaters are supplied in the constructor for the proxy confguration,
+     * this function will attempt to load the proxy info from the users home directory
+     * ~/jaggedsoft/php-binance-api.json
+     *
+     * @return null
+     */
+    protected function setupProxyConfigSettingsArr(array $contents)
+    {
+        if (is_null($this->proxyConf) === false) {
+            return;
+        }
         if (isset($contents['proto']) === false) {
             return;
         }
