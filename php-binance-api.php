@@ -410,7 +410,9 @@ class API
     public function marketQuoteSell(string $symbol, $quantity, array $flags = [])
     {
         $flags['isQuoteOrder'] = true;
-        $c = $this->numberOfDecimals($this->exchangeInfo()['symbols'][$symbol]['filters'][2]['minQty']);
+        $minQty = getFilterData($symbol, 'LOT_SIZE')['minQty'];
+        $c = $this->numberOfDecimals($minQty);        
+        
         $quantity = $this->floorDecimal($quantity, $c);
 
         return $this->order("SELL", $symbol, $quantity, 0, "MARKET", $flags);
@@ -446,7 +448,9 @@ class API
      */
     public function marketSell(string $symbol, $quantity, array $flags = [])
     {
-        $c = $this->numberOfDecimals($this->exchangeInfo()['symbols'][$symbol]['filters'][2]['minQty']);
+        $minQty = getFilterData($symbol, 'LOT_SIZE')['minQty'];
+        $c = $this->numberOfDecimals($minQty);
+        
         $quantity = $this->floorDecimal($quantity, $c);
 
         return $this->order("SELL", $symbol, $quantity, 0, "MARKET", $flags);
@@ -989,7 +993,20 @@ class API
      */
     public function prices()
     {
-        return $this->priceData($this->httpRequest("v3/ticker/price"));
+        $attempts = 3;
+        $attempt = 0;
+        //часто результат запроса null, поэтому несколько попыток делаем
+        while(true){
+            $attempt++;
+            $pricesRequestRes = $this->httpRequest("v3/ticker/price");
+            if(empty($pricesRequestRes) && $attempt <= $attempts){
+                sleep(2);
+                continue;
+            }else{
+                break;
+            }
+        }
+        return $this->priceData($pricesRequestRes);
     }
 
     /**
@@ -1017,7 +1034,20 @@ class API
      */
     public function bookPrices()
     {
-        return $this->bookPriceData($this->httpRequest("v3/ticker/bookTicker"));
+        //$this->httpRequest("v3/ticker/bookTicker") иногда возвращает null!!!
+        $attempts = 10;
+        $attempt = 0;
+        while ($attempt <= $attempts) {
+            $attempt++;
+            $bookPriceTicker = $this->httpRequest("v3/ticker/bookTicker");
+            //если не null, всё хорошо, выходим из цикла
+            if ($bookPriceTicker != null) {
+                break;
+            }elseif($attempt == $attempts && $bookPriceTicker == null){
+                throw new \Exception("Даже на $attempt попытке bookTicker вернул null!", 1);
+            }
+        }
+        return $this->bookPriceData($bookPriceTicker);
     }
 
     /**
@@ -2043,17 +2073,28 @@ class API
      * @return rounded value. example: roundStep(1.2345, 0.1) = 1.2
      *
      */
-    public function roundStep($qty, $stepSize = 0.1)
+    //здесь раньше стоял stepSize по умолчанию, но убрал, т.к. всегда из exchangeInfo надо брать, иначе, если забудешь указать, будет неправильное значение браться.
+    public function roundStep($qty, $stepSize, $roundMode=NULL)
     {
         $precision = strlen(substr(strrchr(rtrim($stepSize, '0'), '.'), 1));
-        return round((($qty / $stepSize) | 0) * $stepSize, $precision);
+        if ($roundMode == 'round_up') {
+            //хоть немного выше, округлим в бОльшую сторону
+            $qty = round_up($qty / $stepSize, 0) * $stepSize;
+            return round_up($qty, $precision);
+        }else{
+            //|0 - отбрасывает дробную часть, то есть в меньшую сторону округлит
+            $qty = (($qty / $stepSize) | 0) * $stepSize;
+            //если выше половины, округлим в бОльшую, если ниже - в меньшую
+            return round($qty, $precision);
+        }
     }
 
     /**
      * roundTicks rounds price with tickSize
      * @param $value price
      * @param $tickSize parameter from exchangeInfo
-     * @return rounded value. example: roundStep(1.2345, 0.1) = 1.2
+     * @return rounded value. example: 
+     (1.2345, 0.1) = 1.2
      *
      */
     public function roundTicks($price, $tickSize)
@@ -3077,5 +3118,17 @@ class API
         ];
       
         return $this->httpRequest("v1/bswap/quote", 'GET', $opt, true);
+    }
+    
+    //MY
+    public function getFilterData($symbol, $filterName){
+        $exchangeInfo = $this->exchangeInfo();
+        $symbolFilters = $exchangeInfo['symbols'][$symbol]['filters'];
+        foreach ($symbolFilters as $filterInfo) {
+            if ($filterInfo['filterType'] === $filterName) {
+                return $filterInfo;
+            }
+        }
+        return false;
     }
 }
