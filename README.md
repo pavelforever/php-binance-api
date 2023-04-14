@@ -16,7 +16,7 @@ This project is designed to help you make your own projects that interact with t
 
 #### Installation
 ```
-composer require "jaggedsoft/php-binance-api @dev"
+composer require "pavelforever/php-binance-api @dev"
 ```
 <details>
  <summary>Click for help with installation</summary>
@@ -31,16 +31,16 @@ php composer.phar install
 ```
 Composer not found? Use this command instead:
 ```
-php composer.phar require "jaggedsoft/php-binance-api @dev"
+php composer.phar require "pavelforever/php-binance-api @dev"
 ```
 
 #### Windows:
-[Download installer for Windows](https://github.com/jaggedsoft/php-binance-api/#installing-on-windows)
+[Download installer for Windows](https://github.com/pavelforever/php-binance-api/#installing-on-windows)
 
 </details>
 
 #### Getting started
-`composer require jaggedsoft/php-binance-api`
+`composer require pavelforever/php-binance-api`
 ```php
 require 'vendor/autoload.php';
 // 1. config in home directory
