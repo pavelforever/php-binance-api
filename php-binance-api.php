@@ -242,7 +242,6 @@ class API
         if (count($this->curlOpts) > 0) {
             return;
         }
-        $contents = json_decode(file_get_contents($file), true);
         $this->curlOpts = isset($contents['curlOpts']) && is_array($contents['curlOpts']) ? $contents['curlOpts'] : [];
     }
 
