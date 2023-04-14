@@ -45,8 +45,8 @@ php composer.phar require "pavelforever/php-binance-api @dev"
 require 'vendor/autoload.php';
 // 1. config in home directory
 $api = new Binance\API();
-// 2. config in specified file
-$api = new Binance\API( "somefile.json" );
+// 2. config in array
+$api = new Binance\API( ['api key'=>"<api key>", 'api-secret' => "<api secret>", ...] );
 // 3. config by specifying api key and secret
 $api = new Binance\API("<api key>","<secret>");
 // 4. config by specifying api key, api secret and testnet flag. By default the testnet is disabled
