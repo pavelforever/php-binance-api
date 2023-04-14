@@ -86,9 +86,9 @@ class API
                 $this->setupCurlOptsFromFile();
                 break;
             case 1:
-                $this->setupApiConfigFromSettingsArr($param[0]);
-                $this->setupProxyConfigFromSettingsArr($param[0]);
-                $this->setupCurlOptsFromSettingsArr($param[0]);
+                $this->setupApiConfigFromArr($param[0]);
+                $this->setupProxyConfigFromArr($param[0]);
+                $this->setupCurlOptsFromArr($param[0]);
                 break;
             case 2:
                 $this->api_key = $param[0];
@@ -219,7 +219,7 @@ class API
         }
     }
     
-    protected function setupProxyConfigSettingsArr(array $contents)
+    protected function setupApiConfigFromArr(array $contents)
     {
         if (empty($this->api_key) === false || empty($this->api_secret) === false) {
             return;
@@ -237,7 +237,7 @@ class API
      * @param $file string file location
      * @return null
      */
-    protected function setupProxyConfigSettingsArr(array $contents)
+    protected function setupCurlOptsFromArr(array $contents)
     {
         if (count($this->curlOpts) > 0) {
             return;
@@ -253,7 +253,7 @@ class API
      *
      * @return null
      */
-    protected function setupProxyConfigSettingsArr(array $contents)
+    protected function setupProxyConfigFromArr(array $contents)
     {
         if (is_null($this->proxyConf) === false) {
             return;
