@@ -468,7 +468,7 @@ class API
     public function marketQuoteSell(string $symbol, $quantity, array $flags = [])
     {
         $flags['isQuoteOrder'] = true;
-        $minQty = getFilterData($symbol, 'LOT_SIZE')['minQty'];
+        $minQty = $this->getFilterData($symbol, 'LOT_SIZE')['minQty'];
         $c = $this->numberOfDecimals($minQty);        
         
         $quantity = $this->floorDecimal($quantity, $c);
@@ -506,7 +506,7 @@ class API
      */
     public function marketSell(string $symbol, $quantity, array $flags = [])
     {
-        $minQty = getFilterData($symbol, 'LOT_SIZE')['minQty'];
+        $minQty = $this->getFilterData($symbol, 'LOT_SIZE')['minQty'];
         $c = $this->numberOfDecimals($minQty);
         
         $quantity = $this->floorDecimal($quantity, $c);
