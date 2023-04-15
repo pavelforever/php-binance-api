@@ -3187,6 +3187,7 @@ class API
                 return $filterInfo;
             }
         }
+        dump($symbolFilters);
         throw new \Exception("Not found filter $filterName in symbol $symbol", 1);
     }
 }
