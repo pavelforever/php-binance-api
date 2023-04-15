@@ -3181,14 +3181,12 @@ class API
     //MY
     public function getFilterData($symbol, $filterName){
         $exchangeInfo = $this->exchangeInfo();
-        dump($exchangeInfo);
         $symbolFilters = $exchangeInfo['symbols'][$symbol]['filters'];
-        dump($symbolFilters);
         foreach ($symbolFilters as $filterInfo) {
             if ($filterInfo['filterType'] === $filterName) {
                 return $filterInfo;
             }
         }
-        return false;
+        throw new \Exception("Not found filter $filterName in symbol $symbol", 1);
     }
 }
